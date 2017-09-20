@@ -65,4 +65,5 @@ it("", () => {
     test(obj2);
     test({ x: obj2 });
     test([obj2, obj2]);
+    test({ foo: "a\"b" });
 });

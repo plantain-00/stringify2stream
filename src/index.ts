@@ -54,7 +54,7 @@ function stringifyInternally(value: any, write: (data: string) => void, baseInde
                 });
             }
             if (i !== value.length - 1) {
-                write(",");
+                write(`,`);
             }
         }
         if (baseIndent !== undefined) {
@@ -63,7 +63,7 @@ function stringifyInternally(value: any, write: (data: string) => void, baseInde
             write(`]`);
         }
     } else if (typeof value === "string" || value instanceof String) {
-        write(`"${value}"`);
+        write(escapeQuote(value.toString()));
     } else if (typeof value === "boolean"
         || value instanceof Boolean
         || typeof value === "number"
@@ -72,15 +72,15 @@ function stringifyInternally(value: any, write: (data: string) => void, baseInde
     } else if (value === null) {
         write(`null`);
     } else if (value instanceof Date) {
-        write(`"${value.toISOString()}"`);
+        write(escapeQuote(value.toISOString()));
     } else if (typeof value === "object") {
         if (typeof value.toJSON === "function") {
             if (parent.type === ParentType.root) {
-                write(`"${value.toJSON("")}"`);
+                write(escapeQuote(value.toJSON("")));
             } else if (parent.type === ParentType.array) {
-                write(`"${value.toJSON(parent.index.toString())}"`);
+                write(escapeQuote(value.toJSON(parent.index.toString())));
             } else {
-                write(`"${value.toJSON(parent.propertyName)}"`);
+                write(escapeQuote(value.toJSON(parent.propertyName)));
             }
             return;
         }
@@ -91,12 +91,12 @@ function stringifyInternally(value: any, write: (data: string) => void, baseInde
             const child = value[key];
             if (!isInvalidValue(child)) {
                 if (canEmitComma) {
-                    write(",");
+                    write(`,`);
                 }
                 if (baseIndent !== undefined) {
-                    write(`\n${currentIndent}"${key}": `);
+                    write(`\n${currentIndent}${escapeQuote(key)}: `);
                 } else {
-                    write(`"${key}":`);
+                    write(`${escapeQuote(key)}:`);
                 }
                 canEmitComma = true;
                 stringifyInternally(child, write, baseIndent, currentIndent, {
@@ -117,4 +117,25 @@ function isInvalidValue(value: any) {
     return value === undefined
         || typeof value === "function"
         || typeof value === "symbol";
+}
+
+const quoteEscapeRegExp = /[\\"\u0000-\u001f\u007f-\u009f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g;
+const meta: { [key: string]: string | undefined } = {
+    "\b": "\\b",
+    "\t": "\\t",
+    "\n": "\\n",
+    "\f": "\\f",
+    "\r": "\\r",
+    "\"": "\\\"",
+    "\\": "\\\\",
+};
+
+function escapeQuote(str: string) {
+    quoteEscapeRegExp.lastIndex = 0;
+    return quoteEscapeRegExp.test(str)
+        ? "\"" + str.replace(quoteEscapeRegExp, a => {
+            const c = meta[a];
+            return typeof c === "string" ? c : "\\u" + ("0000" + a.charCodeAt(0).toString(16)).slice(-4);
+        }) + "\""
+        : "\"" + str + "\"";
 }
