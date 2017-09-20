@@ -1,19 +1,22 @@
 /**
  * @public
  */
-export default function stringify(value: any, write: (data: string) => void, replacer?: ((key: string, value: any) => any) | (number | string)[] | null, space?: string | number) {
+export default function stringify(value: any, write: (data: string | undefined) => void, replacer?: ((key: string, value: any) => any) | (number | string)[] | null, space?: string | number) {
     if (isInvalidValue(value)) {
-        write("undefined");
+        write(undefined);
         return;
     }
     let indent: string | undefined;
-    if (typeof space === "number") {
+    if (typeof space === "number"
+        && !isNaN(space)
+        && space >= 1) {
         indent = "";
-        for (let i = 0; i < space; i++) {
+        const spaceCount = Math.min(Math.floor(space), 10);
+        for (let i = 0; i < spaceCount; i++) {
             indent += " ";
         }
     } else if (typeof space === "string") {
-        indent = space;
+        indent = space.substring(0, 10);
     }
 
     stringifyInternally(value, write, indent, "", { type: ParentType.root });
