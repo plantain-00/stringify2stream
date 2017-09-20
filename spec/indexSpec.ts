@@ -121,4 +121,13 @@ it("", () => {
     test({ a: 2 }, null, 2.9);
     test({ a: 2 }, null, NaN);
     test({ a: 2 }, null, "1234567890abc");
+    const replacer = (key: string, value: any) => {
+        if (typeof value === "string") {
+            return undefined;
+        }
+        return value;
+    };
+    test({ foundation: "Mozilla", model: "box", week: 45, transport: "car", month: 7 }, replacer);
+    test(["foo", 123], replacer);
+    test({ foundation: "Mozilla", model: "box", week: 45, transport: "car", month: 7 }, ["week", "month"]);
 });

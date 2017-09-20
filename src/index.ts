@@ -19,7 +19,7 @@ export default function stringify(value: any, write: (data: string | undefined) 
         indent = space.substring(0, 10);
     }
 
-    stringifyInternally(value, write, indent, "", { type: ParentType.root });
+    stringifyInternally(value, write, replacer, indent, "", { type: ParentType.root });
 }
 
 const enum ParentType {
@@ -40,7 +40,7 @@ type Parent =
         propertyName: string;
     };
 
-function stringifyInternally(value: any, write: (data: string) => void, baseIndent: string | undefined, indent: string, parent: Parent) {
+function stringifyInternally(value: any, write: (data: string) => void, replacer: ((key: string, value: any) => any) | (number | string)[] | null | undefined, baseIndent: string | undefined, indent: string, parent: Parent) {
     const currentIndent = baseIndent === undefined ? indent : indent + baseIndent;
     if (Array.isArray(value)) {
         write(`[`);
@@ -51,7 +51,23 @@ function stringifyInternally(value: any, write: (data: string) => void, baseInde
             if (isInvalidValue(value[i])) {
                 write(`null`);
             } else {
-                stringifyInternally(value[i], write, baseIndent, currentIndent, {
+                let child = value[i];
+                if (replacer) {
+                    if (typeof replacer === "function") {
+                        const result = replacer(i.toString(), value[i]);
+                        if (isInvalidValue(result)) {
+                            write(`null`);
+                            if (i !== value.length - 1) {
+                                write(`,`);
+                            }
+                            continue;
+                        } else {
+                            child = result;
+                        }
+                    }
+                }
+
+                stringifyInternally(child, write, replacer, baseIndent, currentIndent, {
                     type: ParentType.array,
                     index: i,
                 });
@@ -87,26 +103,44 @@ function stringifyInternally(value: any, write: (data: string) => void, baseInde
             }
             return;
         }
+
         write(`{`);
         let canEmitComma = false;
         // tslint:disable-next-line:forin
         for (const key in value) {
-            const child = value[key];
-            if (!isInvalidValue(child)) {
-                if (canEmitComma) {
-                    write(`,`);
-                }
-                if (baseIndent !== undefined) {
-                    write(`\n${currentIndent}${escapeQuote(key)}: `);
-                } else {
-                    write(`${escapeQuote(key)}:`);
-                }
-                canEmitComma = true;
-                stringifyInternally(child, write, baseIndent, currentIndent, {
-                    type: ParentType.object,
-                    propertyName: key,
-                });
+            let child = value[key];
+            if (isInvalidValue(child)) {
+                continue;
             }
+
+            if (replacer) {
+                if (typeof replacer === "function") {
+                    const result = replacer(key, child);
+                    if (isInvalidValue(result)) {
+                        continue;
+                    } else {
+                        child = result;
+                    }
+                } else if (Array.isArray(replacer)) {
+                    if (replacer.every(r => r !== key)) {
+                        continue;
+                    }
+                }
+            }
+
+            if (canEmitComma) {
+                write(`,`);
+            }
+            if (baseIndent !== undefined) {
+                write(`\n${currentIndent}${escapeQuote(key)}: `);
+            } else {
+                write(`${escapeQuote(key)}:`);
+            }
+            canEmitComma = true;
+            stringifyInternally(child, write, replacer, baseIndent, currentIndent, {
+                type: ParentType.object,
+                propertyName: key,
+            });
         }
         if (baseIndent !== undefined) {
             write(`\n${indent}}`);
