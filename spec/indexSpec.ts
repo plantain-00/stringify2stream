@@ -48,6 +48,10 @@ it("", () => {
     test({ a: 2 }, null, 3);
     test({ a: 2, b: "abc" }, null, " ");
     test([1, 2, 3], null, " ");
+    test([]);
+    test([], null, 1);
+    test({});
+    test({}, null, 1);
     test({ a: [1, 2, 3] }, null, " ");
     test([{ a: 1, b: [2] }], null, " ");
     test({ uno: 1, dos: 2 }, null, "\t");

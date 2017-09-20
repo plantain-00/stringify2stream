@@ -76,7 +76,7 @@ function stringifyInternally(value: any, write: (data: string) => void, replacer
                 write(`,`);
             }
         }
-        if (baseIndent !== undefined) {
+        if (baseIndent !== undefined && value.length > 0) {
             write(`\n${indent}]`);
         } else {
             write(`]`);
@@ -142,7 +142,7 @@ function stringifyInternally(value: any, write: (data: string) => void, replacer
                 propertyName: key,
             });
         }
-        if (baseIndent !== undefined) {
+        if (baseIndent !== undefined && Object.keys(value).length > 0) {
             write(`\n${indent}}`);
         } else {
             write(`}`);
