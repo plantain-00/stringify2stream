@@ -15,8 +15,9 @@ A js library to stringify json to stream to avoid out-of-memory of JSON.stringif
 #### usage
 
 ```ts
-import stringify from "stringify2stream/nodejs";
-// import stringify from "stringify2stream/browser";
+import stringify from "stringify2stream";
+// import stringify from "stringify2stream/nodejs"; // ES syntax
+// import stringify from "stringify2stream/browser"; // ES module
 // <script src="./node_modules/stringify2stream/stringify2stream.min.js"></script>
 
 const writeStream = getWritableStreamSomehow();
