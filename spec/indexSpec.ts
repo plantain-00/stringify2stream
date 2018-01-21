@@ -20,8 +20,6 @@ function test (value: any, replacer?: any, space?: string | number) {
   expect(result).toEqual(JSON.stringify(value, replacer, space))
 }
 
-// tslint:disable:no-construct
-
 it('', () => {
   test(undefined)
   test({})

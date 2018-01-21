@@ -106,7 +106,6 @@ function stringifyInternally (value: any, write: (data: string) => void, replace
 
     write(`{`)
     let canEmitComma = false
-        // tslint:disable-next-line:forin
     for (const key in value) {
       let child = value[key]
       if (isInvalidValue(child)) {
