@@ -1,15 +1,15 @@
 /**
  * @public
  */
-export default function stringify (value: any, write: (data: string | undefined) => void, replacer?: ((key: string, value: any) => any) | (number | string)[] | null, space?: string | number) {
+export default function stringify(value: any, write: (data: string | undefined) => void, replacer?: ((key: string, value: any) => any) | (number | string)[] | null, space?: string | number) {
   if (isInvalidValue(value)) {
     write(undefined)
     return
   }
   let indent: string | undefined
   if (typeof space === 'number'
-        && !isNaN(space)
-        && space >= 1) {
+    && !isNaN(space)
+    && space >= 1) {
     indent = ''
     const spaceCount = Math.min(Math.floor(space), 10)
     for (let i = 0; i < spaceCount; i++) {
@@ -23,87 +23,122 @@ export default function stringify (value: any, write: (data: string | undefined)
 }
 
 const enum ParentType {
-    root,
-    array,
-    object
+  root,
+  array,
+  object
 }
 
 type Parent =
-    {
-      type: ParentType.root;
-    }
-    | {
-      type: ParentType.array;
-      index: number;
-    } | {
-      type: ParentType.object;
-      propertyName: string;
-    }
+  {
+    type: ParentType.root;
+  }
+  | {
+    type: ParentType.array;
+    index: number;
+  } | {
+    type: ParentType.object;
+    propertyName: string;
+  }
 
-function stringifyInternally (value: any, write: (data: string) => void, replacer: ((key: string, value: any) => any) | (number | string)[] | null | undefined, baseIndent: string | undefined, indent: string, parent: Parent) {
+function stringifyInternally(
+  value: any,
+  write: (data: string) => void,
+  replacer: Replacer,
+  baseIndent: string | undefined,
+  indent: string,
+  parent: Parent) {
   const currentIndent = baseIndent === undefined ? indent : indent + baseIndent
   if (Array.isArray(value)) {
-    write(`[`)
-    for (let i = 0; i < value.length; i++) {
-      if (baseIndent !== undefined) {
-        write(`\n${currentIndent}`)
-      }
-      if (isInvalidValue(value[i])) {
-        write(`null`)
-      } else {
-        let child = value[i]
-        if (replacer) {
-          if (typeof replacer === 'function') {
-            const result = replacer(i.toString(), value[i])
-            if (isInvalidValue(result)) {
-              write(`null`)
-              if (i !== value.length - 1) {
-                write(`,`)
-              }
-              continue
-            } else {
-              child = result
-            }
-          }
-        }
-
-        stringifyInternally(child, write, replacer, baseIndent, currentIndent, {
-          type: ParentType.array,
-          index: i
-        })
-      }
-      if (i !== value.length - 1) {
-        write(`,`)
-      }
-    }
-    if (baseIndent !== undefined && value.length > 0) {
-      write(`\n${indent}]`)
-    } else {
-      write(`]`)
-    }
+    stringifyArray(value, write, replacer, baseIndent, indent, parent, currentIndent)
   } else if (typeof value === 'string' || value instanceof String) {
     write(escapeQuote(value.toString()))
   } else if (typeof value === 'boolean'
-        || value instanceof Boolean
-        || typeof value === 'number'
-        || value instanceof Number) {
+    || value instanceof Boolean
+    || typeof value === 'number'
+    || value instanceof Number) {
     write(`${value.toString()}`)
   } else if (value === null) {
     write(`null`)
   } else if (value instanceof Date) {
     write(escapeQuote(value.toISOString()))
   } else if (typeof value === 'object') {
-    if (typeof value.toJSON === 'function') {
-      if (parent.type === ParentType.root) {
-        write(escapeQuote(value.toJSON('')))
-      } else if (parent.type === ParentType.array) {
-        write(escapeQuote(value.toJSON(parent.index.toString())))
-      } else {
-        write(escapeQuote(value.toJSON(parent.propertyName)))
-      }
-      return
-    }
+    stringifyObject(value, write, replacer, baseIndent, indent, parent, currentIndent)
+  }
+}
 
+// tslint:disable-next-line:cognitive-complexity
+function stringifyArray(
+  value: any,
+  write: (data: string) => void,
+  replacer: Replacer,
+  baseIndent: string | undefined,
+  indent: string,
+  parent: Parent,
+  currentIndent: string) {
+  write(`[`)
+  for (let i = 0; i < value.length; i++) {
+    if (baseIndent !== undefined) {
+      write(`\n${currentIndent}`)
+    }
+    if (isInvalidValue(value[i])) {
+      write(`null`)
+    } else {
+      let child = value[i]
+      if (replacer) {
+        if (typeof replacer === 'function') {
+          const result = replacer(i.toString(), value[i])
+          if (isInvalidValue(result)) {
+            write(`null`)
+            if (i !== value.length - 1) {
+              write(`,`)
+            }
+            continue
+          } else {
+            child = result
+          }
+        }
+      }
+
+      stringifyInternally(child, write, replacer, baseIndent, currentIndent, {
+        type: ParentType.array,
+        index: i
+      })
+    }
+    if (i !== value.length - 1) {
+      write(`,`)
+    }
+  }
+  if (baseIndent !== undefined && value.length > 0) {
+    write(`\n${indent}`)
+  }
+  write(`]`)
+}
+
+function stringifyByToJson(
+  value: any,
+  write: (data: string) => void,
+  parent: Parent) {
+  if (parent.type === ParentType.root) {
+    write(escapeQuote(value.toJSON('')))
+  } else if (parent.type === ParentType.array) {
+    write(escapeQuote(value.toJSON(parent.index.toString())))
+  } else {
+    write(escapeQuote(value.toJSON(parent.propertyName)))
+  }
+}
+
+// tslint:disable-next-line:cognitive-complexity
+function stringifyObject(
+  value: any,
+  write: (data: string) => void,
+  replacer: Replacer,
+  baseIndent: string | undefined,
+  indent: string,
+  parent: Parent,
+  currentIndent: string) {
+  if (typeof value.toJSON === 'function') {
+    stringifyByToJson(value, write, parent)
+  } else {
     write(`{`)
     let canEmitComma = false
     for (const key in value) {
@@ -142,17 +177,16 @@ function stringifyInternally (value: any, write: (data: string) => void, replace
       })
     }
     if (baseIndent !== undefined && Object.keys(value).length > 0) {
-      write(`\n${indent}}`)
-    } else {
-      write(`}`)
+      write(`\n${indent}`)
     }
+    write(`}`)
   }
 }
 
-function isInvalidValue (value: any) {
+function isInvalidValue(value: any) {
   return value === undefined
-        || typeof value === 'function'
-        || typeof value === 'symbol'
+    || typeof value === 'function'
+    || typeof value === 'symbol'
 }
 
 const quoteEscapeRegExp = /[\\"\u0000-\u001f\u007f-\u009f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g
@@ -166,12 +200,14 @@ const meta: { [key: string]: string | undefined } = {
   '\\': '\\\\'
 }
 
-function escapeQuote (str: string) {
+function escapeQuote(str: string) {
   quoteEscapeRegExp.lastIndex = 0
   return quoteEscapeRegExp.test(str)
-        ? '"' + str.replace(quoteEscapeRegExp, a => {
-          const c = meta[a]
-          return typeof c === 'string' ? c : '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4)
-        }) + '"'
-        : '"' + str + '"'
+    ? '"' + str.replace(quoteEscapeRegExp, a => {
+      const c = meta[a]
+      return typeof c === 'string' ? c : '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4)
+    }) + '"'
+    : '"' + str + '"'
 }
+
+type Replacer = ((key: string, value: any) => any) | (number | string)[] | null | undefined

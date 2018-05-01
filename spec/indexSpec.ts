@@ -1,10 +1,12 @@
 import * as stream from 'stream'
 import stringify from '../dist/nodejs'
 
-function test (value: any, replacer?: any, space?: string | number) {
+// tslint:disable:use-primitive-type
+
+function test(value: any, replacer?: any, space?: string | number) {
   let result: string | undefined = ''
   const writeStream = new stream.Writable({
-    write (chunk, encoding, callback) {
+    write(chunk, encoding, callback) {
       result += chunk.toString()
       callback()
     }
@@ -54,13 +56,13 @@ it('', () => {
   test({ uno: 1, dos: 2 }, null, '\t')
   test({
     foo: 'foo',
-    bar () {
+    bar() {
       return 'bar'
     }
   })
   const obj = {
     foo: 'foo',
-    toJSON () {
+    toJSON() {
       return 'bar'
     }
   }
@@ -68,7 +70,7 @@ it('', () => {
   test({ x: obj })
   const obj2 = {
     foo: 'foo',
-    toJSON (key: string) {
+    toJSON(key: string) {
       if (key === '') {
         return 'bar only'
       } else {
