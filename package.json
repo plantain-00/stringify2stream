@@ -1,8 +1,12 @@
 {
   "name": "stringify2stream",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A js library to stringify json to stream to avoid out-of-memory of JSON.stringify.",
   "main": "index.js",
+  "module": "index.js",
+  "unpkg": "stringify2stream.min.js",
+  "jsdelivr": "stringify2stream.min.js",
+  "types": "index.d.ts",
   "scripts": {
     "build": "clean-scripts build",
     "lint": "clean-scripts lint",
