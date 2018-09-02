@@ -1,6 +1,6 @@
 {
   "name": "stringify2stream",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "A js library to stringify json to stream to avoid out-of-memory of JSON.stringify.",
   "main": "nodejs/index.js",
   "module": "browser/index.js",
