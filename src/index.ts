@@ -84,18 +84,16 @@ function stringifyArray(
       write(`null`)
     } else {
       let child = value[i]
-      if (replacer) {
-        if (typeof replacer === 'function') {
-          const result = replacer(i.toString(), value[i])
-          if (isInvalidValue(result)) {
-            write(`null`)
-            if (i !== value.length - 1) {
-              write(`,`)
-            }
-            continue
-          } else {
-            child = result
+      if (replacer && typeof replacer === 'function') {
+        const result = replacer(i.toString(), value[i])
+        if (isInvalidValue(result)) {
+          write(`null`)
+          if (i !== value.length - 1) {
+            write(`,`)
           }
+          continue
+        } else {
+          child = result
         }
       }
 
@@ -155,10 +153,8 @@ function stringifyObject(
           } else {
             child = result
           }
-        } else if (Array.isArray(replacer)) {
-          if (replacer.every(r => r !== key)) {
-            continue
-          }
+        } else if (Array.isArray(replacer) && replacer.every(r => r !== key)) {
+          continue
         }
       }
 
