@@ -7,6 +7,7 @@
 [![npm version](https://badge.fury.io/js/stringify2stream.svg)](https://badge.fury.io/js/stringify2stream)
 [![Downloads](https://img.shields.io/npm/dm/stringify2stream.svg)](https://www.npmjs.com/package/stringify2stream)
 [![gzip size](https://img.badgesize.io/https://unpkg.com/stringify2stream?compression=gzip)](https://unpkg.com/stringify2stream)
+[![type-coverage](https://img.shields.io/badge/dynamic/json.svg?label=type-coverage&prefix=%E2%89%A5&suffix=%&query=$.typeCoverage.atLeast&uri=https%3A%2F%2Fraw.githubusercontent.com%2Fplantain-00%2Fstringify2stream%2Fmaster%2Fpackage.json)](https://github.com/plantain-00/stringify2stream)
 
 A js library to stringify json to stream to avoid out-of-memory of JSON.stringify.
 
