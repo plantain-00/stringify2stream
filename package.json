@@ -27,10 +27,10 @@
   },
   "homepage": "https://github.com/plantain-00/stringify2stream#readme",
   "devDependencies": {
-    "@commitlint/cli": "7.5.0",
+    "@commitlint/cli": "7.5.2",
     "@commitlint/config-conventional": "7.5.0",
-    "@types/jasmine": "3.3.8",
-    "@types/node": "10.12.24",
+    "@types/jasmine": "3.3.9",
+    "@types/node": "11.9.4",
     "clean-scripts": "1.9.2",
     "jasmine": "3.3.1",
     "markdownlint-cli": "0.13.0",
