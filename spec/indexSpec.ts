@@ -1,8 +1,6 @@
 import * as stream from 'stream'
 import stringify from '../dist/nodejs'
 
-// tslint:disable:use-primitive-type
-
 function test(value: any, replacer?: any, space?: string | number) {
   let result: string | undefined = ''
   const writeStream = new stream.Writable({

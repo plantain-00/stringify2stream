@@ -66,7 +66,6 @@ function stringifyInternally(
   }
 }
 
-// tslint:disable-next-line:cognitive-complexity
 function stringifyArray(
   value: any,
   write: (data: string) => void,
@@ -125,7 +124,6 @@ function stringifyByToJson(
   }
 }
 
-// tslint:disable-next-line:cognitive-complexity
 function stringifyObject(
   value: any,
   write: (data: string) => void,
