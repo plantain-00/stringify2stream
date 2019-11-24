@@ -6,7 +6,6 @@
   "module": "browser/index.js",
   "unpkg": "stringify2stream.min.js",
   "jsdelivr": "stringify2stream.min.js",
-  "types": "nodejs/index.d.ts",
   "scripts": {
     "build": "clean-scripts build",
     "lint": "clean-scripts lint",
@@ -29,6 +28,7 @@
   "devDependencies": {
     "@commitlint/cli": "8.2.0",
     "@commitlint/config-conventional": "8.2.0",
+    "@microsoft/api-extractor": "^7.6.2",
     "@types/jasmine": "3.5.0",
     "@types/node": "12.12.11",
     "@typescript-eslint/eslint-plugin": "2.8.0",
